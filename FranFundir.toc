@@ -48,6 +48,7 @@ Core\Recipes.lua
 Core\RecipeScan.lua
 Core\Prices.lua
 Core\Planner.lua
+Core\Production.lua
 Core\BagReport.lua
 #   Interfaz: piezas compartidas con FranTools
 UI\Tooltip.lua

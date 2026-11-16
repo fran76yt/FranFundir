@@ -10,17 +10,21 @@ bloques, de arriba abajo, que UI/ReportWindow.lua solo tiene que pintar:
   { kind = "section", title, hint }
       Título de un grupo; hint dice qué es la columna de la derecha.
   { kind = "item", id, title, detail, right, rightDetail }
-      Un objeto: icono (id), "20 Mena de cobre" y, debajo, qué hacer;
-      a la derecha el dinero y, debajo, lo que ganas.
+      Un objeto: icono (id), "20 Mena de cobre" y, debajo, el detalle;
+      a la derecha el dinero y, debajo, una aclaración.
   { kind = "note", text }
       Un aviso en gris (sin TSM, bolsas vacías, abrir la ventana de minería).
+
+Las secciones siguen el orden en que se hace: los pasos (fundir, hacer
+bronce...), lo que se vende al final, lo que hay que comprar, y aparte las
+transmutaciones y lo que no tiene precio.
 
 ReportLayout.Blocks(report) no toca la interfaz: así se puede probar.
 ]]
 
 local _, ns = ...
-local Const, Api, Tsm, Recipes, Planner, PlanText =
-    ns.Const, ns.Api, ns.Tsm, ns.Recipes, ns.Planner, ns.PlanText
+local Const, Api, Tsm, Recipes, Planner, Prices, PlanText =
+    ns.Const, ns.Api, ns.Tsm, ns.Recipes, ns.Planner, ns.Prices, ns.PlanText
 
 local ReportLayout = {}
 ns.ReportLayout = ReportLayout
@@ -39,6 +43,10 @@ local function gainText(copper)
     return copper and copper > 0 and PlanText.Gain(copper) or ""
 end
 
+local function eachPrice(copper)
+    return ("a %s cada uno"):format(PlanText.Money(copper))
+end
+
 --------------------------------------------------------------------------------
 -- Resumen
 --------------------------------------------------------------------------------
@@ -55,73 +63,89 @@ local function summary(totals)
 end
 
 --------------------------------------------------------------------------------
--- Una fila por objeto, según el grupo
+-- Pasos
 --------------------------------------------------------------------------------
 
--- Qué hacer con lo que hay. Si aún no llega para una receta, cuántas faltan.
-local function craftDetail(entry)
-    local route = entry.route
-    if route.final[2] == 0 then
-        return ("Faltan %g para la primera: %s"):format(route.per - entry.count, PlanText.Steps(entry.plan))
+-- De dónde sale lo demás que pide la receta: de lo que llevas, comprado o
+-- de las dos cosas.
+local function originText(extra)
+    if extra.buy == 0 then return "lo llevas" end
+    if extra.own == 0 then return "a comprar" end
+    return ("llevas %g, compras %g"):format(extra.own, extra.buy)
+end
+
+-- "con 10 Lingote de estaño (llevas 4, compras 6) → 20 Lingote de bronce"
+local function stepDetail(step)
+    local parts = {}
+    for _, extra in ipairs(step.extras) do
+        parts[#parts + 1] = ("%s (%s)"):format(PlanText.Amount(extra.id, extra.quantity), originText(extra))
     end
-    local text = PlanText.Steps(entry.plan, route.final[2])
-    if route.leftover > 0 then text = text .. DOT .. ("sobran %g"):format(route.leftover) end
+    local made = "→ " .. PlanText.Amount(step.made[1], step.made[2])
+    if #parts == 0 then return made end
+    return "con " .. table.concat(parts, " + ") .. " " .. made
+end
+
+-- A la derecha, lo que vale lo que sale (aunque luego se gaste en otra
+-- receta: así se ve lo que vale cada lingote del camino).
+local function madeValue(step)
+    local price = Prices.Sell(step.made[1])
+    return price and PlanText.Money(price * step.made[2]) or ""
+end
+
+local function stepItem(step)
+    return {
+        kind = "item", id = step.item,
+        title = ("%s: %s"):format(PlanText.RecipeName(step.recipe), PlanText.Amount(step.item, step.used)),
+        detail = stepDetail(step),
+        right = madeValue(step),
+        rightDetail = "",
+    }
+end
+
+--------------------------------------------------------------------------------
+-- Vender, comprar y lo demás
+--------------------------------------------------------------------------------
+
+-- Si su plan era fabricar algo pero no llega para una, cuántas faltan.
+local function saleDetail(sale)
+    local text = eachPrice(sale.price)
+    if sale.short then
+        text = text .. DOT .. ("faltan %g para %s"):format(sale.short, PlanText.RecipeName(sale.recipe))
+    end
     return text
 end
 
-local function craftItem(entry)
+local function saleItem(sale)
     return {
-        kind = "item", id = entry.id,
-        title = PlanText.Amount(entry.id, entry.count),
-        detail = craftDetail(entry),
-        right = PlanText.Money(entry.planTotal),
-        rightDetail = gainText(entry.gain),
+        kind = "item", id = sale.id,
+        title = PlanText.Amount(sale.id, sale.count),
+        detail = saleDetail(sale),
+        right = PlanText.Money(sale.total),
+        rightDetail = "",
     }
 end
 
-local function needDetail(need)
-    if need.missing == 0 then return ("Ya lo llevas (%g)"):format(need.have) end
-    return ("Llevas %g, faltan %g"):format(need.have, need.missing)
-end
-
--- A la derecha, lo que cuesta comprar lo que falta.
-local function needCost(need)
-    if need.missing == 0 then return "" end
-    return need.cost and PlanText.Money(need.cost) or "sin precio"
-end
-
-local function needItem(need)
+local function buyItem(buy)
     return {
-        kind = "item", id = need.id,
-        title = PlanText.Amount(need.id, need.quantity),
-        detail = needDetail(need),
-        right = needCost(need),
-        rightDetail = need.missing > 0 and "comprar" or "",
-    }
-end
-
-local function sellItem(entry)
-    return {
-        kind = "item", id = entry.id,
-        title = PlanText.Amount(entry.id, entry.count),
-        detail = ("Vender a %s cada uno"):format(PlanText.Money(entry.sell)),
-        right = PlanText.Money(entry.sellTotal),
+        kind = "item", id = buy.id,
+        title = PlanText.Amount(buy.id, buy.quantity),
+        detail = buy.price and eachPrice(buy.price) or Const.TEXT.NO_PRICE,
+        right = buy.cost and PlanText.Money(buy.cost) or "sin precio",
         rightDetail = "",
     }
 end
 
 -- La receta con espera vale para unas pocas: se dice por unidad y cuánto
--- deja de más que lo de arriba.
+-- deja de más que el plan de siempre.
 local function cooldownItem(entry)
-    local plan = entry.cooldown
+    local plan = entry.plan
     local wait = PlanText.Wait(Planner.CooldownRecipe(plan))
-    local base = entry.plan and entry.plan.value or 0
     return {
         kind = "item", id = entry.id,
         title = (Api.ItemName(entry.id)),
         detail = PlanText.Steps(plan) .. DOT .. wait,
         right = PlanText.Money(plan.value),
-        rightDetail = gainText(plan.value - base),
+        rightDetail = gainText(plan.value - entry.base),
     }
 end
 
@@ -141,9 +165,9 @@ end
 -- Cada sección: de qué parte del informe sale, su título, qué dice la
 -- columna de la derecha y cómo se pinta cada fila. Una sección vacía no sale.
 local SECTIONS = {
-    { key = "craft", title = "Fundir y fabricar", hint = "Te deja · ganas", item = craftItem },
-    { key = "needs", title = "Para eso te hace falta", hint = "Cuesta lo que falta", item = needItem },
-    { key = "sell", title = "Vender tal cual", hint = "Te deja", item = sellItem },
+    { key = "steps", title = "Qué hacer, por orden", hint = "Vale lo que sale", item = stepItem },
+    { key = "sales", title = "Vender", hint = "Te deja", item = saleItem },
+    { key = "buys", title = "Comprar", hint = "Cuesta", item = buyItem },
     { key = "cooldown", title = "Aún mejor, con espera", hint = "Por unidad · de más", item = cooldownItem },
     { key = "noPrice", title = "Sin precio", hint = "", item = noPriceItem },
 }

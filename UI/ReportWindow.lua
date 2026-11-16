@@ -9,9 +9,9 @@ de la ventana a lo que ocupan:
   │ Venderlo tal cual │ Siguiendo los consejos │    Ganas    │  resumen
   │      12o 30p      │        15o 80p         │   +3o 50p   │
   ├──────────────────────────────────────────────────────────┤
-  │ Fundir y fabricar                         Te deja · ganas│  sección
-  │ [ico] 20 Mena de cobre                          38p 80c  │  fila
-  │       Cobre fundido › Bronce › vender 40 L...   +19p 80c │
+  │ Qué hacer, por orden                     Vale lo que sale│  sección
+  │ [ico] Cobre fundido: 20 Mena de cobre           22p 80c  │  fila
+  │       → 20 Lingote de cobre                              │
   │ ...                                                      │
   │ [x] Contar también las recetas...    [Tabla de precios]  │  pie
   │ Precios de TSM. Venta: dbmarket ...                      │

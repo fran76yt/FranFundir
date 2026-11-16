@@ -57,34 +57,43 @@ Con espera (cada 1 h): Hierro fundido › Transmutar: hierro a oro › vender Li
 
 ```
  Venderlo tal cual    Siguiendo los consejos        Ganas
-      38p 55c                56p 36c               +17p 81c
+      38p 55c                53p 40c               +14p 85c
 
- Fundir y fabricar                                    Te deja · ganas
+ Qué hacer, por orden                                Vale lo que sale
  ──────────────────────────────────────────────────────────────────
- [icono] 10 Mena de cobre                                    19p 40c
-         Cobre fundido › Bronce fundido › vender 20 ...      +9p 90c
+ [icono] Cobre fundido: 10 Mena de cobre                     11p 40c
+         → 10 Lingote de cobre
+ [icono] Bronce fundido: 10 Lingote de cobre                 28p 40c
+         con 10 Lingote de estaño (llevas 4, compras 6) → 20 Lingote de bronce
 
- Para eso te hace falta                           Cuesta lo que falta
+ Vender                                                       Te deja
  ──────────────────────────────────────────────────────────────────
- [icono] 10 Lingote de estaño                                 5p 40c
-         Llevas 4, faltan 6                                  comprar
+ [icono] 20 Lingote de bronce                                28p 40c
+         a 1p 42c cada uno
 
- Vender tal cual · Aún mejor, con espera · Sin precio ...
+ Comprar                                                       Cuesta
+ ──────────────────────────────────────────────────────────────────
+ [icono] 6 Lingote de estaño                                  5p 40c
+         a 90c cada uno
+
+ Aún mejor, con espera · Sin precio ...
 
  [x] Contar también las recetas que no sé        [Tabla de precios]
  Precios de TSM. Venta: dbmarket (menos el 5% de comisión). Compra: ...
 ```
 
-- **Arriba, el resumen**: lo que sacarías vendiéndolo todo tal cual, lo que sacas siguiendo los consejos y la diferencia.
-- **Fundir y fabricar**: lo que deja más convertido en otra cosa, con los pasos y **cuántos salen de verdad**. Solo cuenta recetas enteras: de 13 menas de hierro negro sale 1 lingote y sobran 5, y si aún no llega para una, dice cuántas faltan. Lo que más gana va arriba.
-- **Para eso te hace falta**: lo demás que piden esas recetas (el estaño del bronce, el carbón del acero), sumado, con lo que ya llevas y lo que cuesta comprar lo que falta.
-- **Vender tal cual**: lo que mejor se vende sin tocarlo.
+El informe sigue los consejos con **todo lo que llevas junto**, como si lo fabricaras: lo que llevas de un material sirve para la receta de otro. Si llevas menas de cobre y lingotes de estaño, el bronce se hace con tus lingotes de estaño y solo se compran los que faltan; si llevas menas de estaño, se funden antes de hacer el bronce. El carbón u otras cosas que pida una receta también se sacan primero de las bolsas.
+
+- **Arriba, el resumen**: lo que sacarías vendiéndolo todo tal cual, lo que sacas siguiendo los consejos (lo que vendes al final menos lo que compras) y la diferencia.
+- **Qué hacer, por orden**: cada receta con lo que gasta, de dónde sale lo demás que pide (lo llevas, a comprar o parte y parte) y lo que da. A la derecha, lo que vale lo que sale, también de los lingotes que luego van a otra receta. Solo cuenta recetas enteras: de 13 menas de hierro negro sale 1 lingote y sobran 5.
+- **Vender**: lo que queda al final, lo que más deja arriba. Si algo no llega para su receta, se vende y dice cuántas faltan.
+- **Comprar**: lo que falta para las recetas, con lo que cuesta.
 - **Aún mejor, con espera**: si una transmutación deja más, por unidad y con su tiempo de espera (no sirve para todo el montón).
 - **Sin precio**: lo que TSM aún no sabe valorar.
 
 Al pasar el ratón por una fila sale el tooltip del objeto. El informe se pone al día solo al cambiar lo que llevas, y la ventana crece o encoge según lo que haya que enseñar.
 
-Lo que pide una receta se valora a precio de compra, cada material por separado. Si llevas lingotes de estaño, el informe puede aconsejarte hacer bronce con ellos y, a la vez, contarlos para el bronce del cobre. La sección «Para eso te hace falta» lo deja a la vista.
+Qué hacer con cada material lo decide el mismo cálculo que el tooltip, que valora lo demás que pide una receta a precio de compra. Llevarlo no cambia la decisión, solo de dónde sale.
 
 ### Botón del minimapa
 
@@ -216,8 +225,9 @@ Todos los archivos reciben la misma tabla privada (`local _, ns = ...`). Las ún
 | [`Core/Recipes.lua`](Core/Recipes.lua) | Las recetas combinadas (las del juego mandan sobre las de los datos), qué gasta cada material y cuáles sabe el personaje |
 | [`Core/RecipeScan.lua`](Core/RecipeScan.lua) | Lee la ventana de la profesión al abrirla: qué recetas sabe y lo que gasta y da cada una según el juego |
 | [`Core/Prices.lua`](Core/Prices.lua) | Precio de venta (menos la comisión, o el del vendedor) y de compra; fuentes de TSM configurables |
-| [`Core/Planner.lua`](Core/Planner.lua) | El cálculo: el mejor plan para cada material, aparte el que usa recetas con espera, y las cantidades de verdad con lo que llevas |
-| [`Core/BagReport.lua`](Core/BagReport.lua) | El informe de las bolsas: qué fundir, qué vender, qué hace falta comprar y los totales |
+| [`Core/Planner.lua`](Core/Planner.lua) | El cálculo: el mejor plan para cada material, aparte el que usa recetas con espera |
+| [`Core/Production.lua`](Core/Production.lua) | Sigue los planes con todo lo que llevas junto: por orden, recetas enteras, lo que llevas antes que comprar |
+| [`Core/BagReport.lua`](Core/BagReport.lua) | El informe de las bolsas: los pasos, qué vender, qué comprar y los totales |
 | [`UI/Tooltip.lua`](UI/Tooltip.lua), [`UI/Checkbox.lua`](UI/Checkbox.lua), [`UI/MinimapButton.lua`](UI/MinimapButton.lua) | *Compartidos con FranTools.* Tooltips de ayuda, casillas y el botón del minimapa |
 | [`UI/PlanText.lua`](UI/PlanText.lua) | Un plan en texto: pasos, dinero, ganancia y espera |
 | [`UI/ItemTooltip.lua`](UI/ItemTooltip.lua) | Las líneas del tooltip de menas y lingotes |
@@ -299,6 +309,7 @@ FranFundir/
 │   ├── RecipeScan.lua                 leer las recetas de la ventana de la profesión
 │   ├── Prices.lua                     precios de venta y compra
 │   ├── Planner.lua                    el cálculo
+│   ├── Production.lua                 seguir los consejos con lo que llevas
 │   ├── BagReport.lua                  el informe de lo que llevas
 │   └── Commands.lua                   comandos /fundir
 ├── Data/
