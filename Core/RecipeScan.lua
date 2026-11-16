@@ -82,6 +82,8 @@ end
 -- La lista de recetas llega poco a poco al abrir la ventana: se lee al
 -- terminar la ráfaga de eventos.
 local scanSoon = Util.Debounce(Const.FRAME.UPDATE_DELAY, RecipeScan.ScanOpenWindow)
+-- Cada versión del juego avisa con unos u otros: se escucha a los que haya
+-- (Forever no tiene TRADE_SKILL_UPDATE, el cliente clásico antiguo sí).
 for _, event in ipairs({ "TRADE_SKILL_SHOW", "TRADE_SKILL_LIST_UPDATE", "TRADE_SKILL_UPDATE" }) do
-    Util.On(event, scanSoon)
+    Util.OnIfExists(event, scanSoon)
 end
