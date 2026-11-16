@@ -147,3 +147,36 @@ function Planner.CooldownRecipe(plan)
         plan = plan.next
     end
 end
+
+--------------------------------------------------------------------------------
+-- Cantidades
+--------------------------------------------------------------------------------
+
+-- Añade a needs lo demás que pide la receta para hacerla "crafts" veces.
+local function addExtras(needs, recipe, itemID, crafts)
+    for _, reagent in ipairs(recipe.reagents) do
+        if reagent[1] ~= itemID then needs[#needs + 1] = { reagent[1], crafts * reagent[2] } end
+    end
+end
+
+-- Sigue el plan con "count" unidades de verdad: solo se fabrican recetas
+-- enteras, así que de una receta que gasta 8 menas sobran las que no llegan
+-- a 8. Devuelve:
+--   needs     lo demás que piden las recetas: { { objeto, cantidad }, ... }
+--   final     lo que se vende al final: { objeto, cantidad }
+--   leftover  unidades del primer paso que no llegan para una receta más
+--   per       cuántas gasta la primera receta
+-- El valor del plan sigue siendo por unidad (lo que deja cada una cuando
+-- se junten las suficientes); esto es para decir qué hacer con lo que hay.
+function Planner.Quantities(plan, count)
+    local needs, leftover, firstPer = {}, 0, nil
+    while plan.recipe do
+        local per = Recipes.QuantityOf(plan.recipe, plan.item)
+        local crafts = math.floor(count / per)
+        if not firstPer then leftover, firstPer = count - crafts * per, per end
+        addExtras(needs, plan.recipe, plan.item, crafts)
+        count = crafts * plan.recipe.output[2]
+        plan = plan.next
+    end
+    return { needs = needs, final = { plan.item, count }, leftover = leftover, per = firstPer }
+end

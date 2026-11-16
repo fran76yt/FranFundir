@@ -11,7 +11,8 @@ que el jugador ha cambiado:
     sellSource   precio de venta de TSM, si no es el de por defecto
     buySource    precio de compra de TSM, si no es el de por defecto
     allRecipes   true si cuenta también las recetas que este personaje no sabe
-    point        posición de la ventana: { punto, punto relativo, x, y }
+    point        posición de la tabla: { punto, punto relativo, x, y }
+    reportPoint  posición del informe, igual
     gameRecipes  recetas tal y como las da el juego, por ID de hechizo:
                  { [2659] = { reagents = { { 2840, 1 }, { 3576, 1 } },
                  output = { 2841, 2 } }, ... }. Son iguales para todos los
@@ -21,6 +22,8 @@ que el jugador ha cambiado:
     known        recetas leídas de su ventana de profesión, por ID: true si
                  la sabe y false si sale en la ventana pero aún no la ha
                  aprendido: { [2657] = true, [3569] = false, ... }
+    minimap      botón del minimapa: angle (posición alrededor, en grados)
+                 y hidden (true si lo ha ocultado con /fundir minimapa)
 
 (FranFundirLog, la de los errores, es de Core/ErrorLog.lua.)
 ]]
@@ -59,4 +62,12 @@ function Storage.GameRecipes()
     local a = account()
     a.gameRecipes = a.gameRecipes or {}
     return a.gameRecipes
+end
+
+-- Botón del minimapa de este personaje (UI/MinimapButton.lua lo usa así,
+-- como función, para leerlo cuando ya están cargadas las variables).
+function Storage.Minimap()
+    local c = character()
+    c.minimap = c.minimap or {}
+    return c.minimap
 end

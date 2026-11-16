@@ -8,10 +8,10 @@ y una tabla privada que comparten todos sus archivos. Usamos esa tabla (ns,
 que podrían chocar con otros addons.
 
 Los archivos compartidos con FranTools (Core/Util.lua, Core/Api.lua,
-Core/ErrorLog.lua, UI/Tooltip.lua y UI/Checkbox.lua, que se editan en
-FranTools y se copian con su tools/sync_shared.py) leen de aquí ADDON_NAME,
-ICON, MSG.SETTINGS_CHANGED, CHAT_PREFIX, UI (TOOLTIP_HELP_COLOR y las medidas
-de las casillas) y ERROR_LOG.
+Core/ErrorLog.lua, UI/Tooltip.lua, UI/Checkbox.lua y UI/MinimapButton.lua,
+que se editan en FranTools y se copian con su tools/sync_shared.py) leen de
+aquí ADDON_NAME, ICON, MSG.SETTINGS_CHANGED, CHAT_PREFIX, UI
+(TOOLTIP_HELP_COLOR y las medidas de las casillas), MINIMAP y ERROR_LOG.
 ]]
 
 local addonName, ns = ...
@@ -52,6 +52,13 @@ Const.PRICE = {
 -- Mismo valor en cobre: no vale la pena recomendar un cambio por menos.
 Const.MIN_GAIN = 1
 
+-- Avisos que salen en más de un sitio (tooltip, ventanas).
+Const.TEXT = {
+    NO_TSM = "Sin precios: hace falta TradeSkillMaster.",
+    OPEN_PROFESSION = "Abre la ventana de minería una vez para que sepa tus recetas.",
+    NO_PRICE = "TSM aún no tiene precio de esto.",
+}
+
 -- Interfaz.
 Const.UI = {
     TOOLTIP_HELP_COLOR = { 0.8, 0.8, 0.8 },
@@ -69,10 +76,16 @@ Const.TOOLTIP = {
     GAIN_COLOR = "33ff66",     -- lo que ganas respecto a vender, en verde
 }
 
--- Ventana con la tabla de todos los materiales.
+-- Lo común a las dos ventanas (UI/BaseWindow.lua).
+Const.FRAME = {
+    TITLE = "FranFundir",
+    UPDATE_DELAY = 0.5,          -- agrupa las ráfagas de BAG_UPDATE
+}
+
+-- Ventana con la tabla de todos los materiales (/fundir tabla).
 Const.WINDOW = {
     NAME = "FranFundirWindow",   -- nombre global (necesario para cerrar con Escape)
-    TITLE = "FranFundir",
+    SAVED_POINT = "point",       -- dónde guarda su posición (Storage.Settings)
     PADDING = 14,
     TOP = -32,                   -- primera fila, bajo la barra de título
     ROW_HEIGHT = 18,
@@ -88,7 +101,58 @@ Const.WINDOW = {
         { key = "gain", title = "Ganas", width = 80 },
     },
     FOOTER_HEIGHT = 56,          -- casilla y texto de los precios, abajo
-    UPDATE_DELAY = 0.5,          -- agrupa las ráfagas de BAG_UPDATE
+}
+
+-- Informe de lo que llevas en las bolsas (/fundir y el botón del minimapa).
+-- Se compone de bloques, uno debajo de otro; la ventana mide lo que ocupan.
+Const.REPORT = {
+    NAME = "FranFundirReport",
+    SAVED_POINT = "reportPoint",
+    SUBTITLE = "Lo que llevas",
+    WIDTH = 540,
+    PADDING = 14,
+    TOP = -30,                   -- primer bloque, bajo la barra de título
+    GAP = 4,                     -- espacio entre bloques
+    SECTION_GAP = 10,            -- y antes de cada sección
+    FOOTER_HEIGHT = 64,          -- casilla, botón y texto de los precios
+    -- Alto de cada tipo de bloque (las notas miden su texto).
+    SUMMARY_HEIGHT = 46,
+    SUMMARY_CELLS = 3,           -- venderlo, seguir los consejos, ganas
+    SECTION_HEIGHT = 20,
+    ITEM_HEIGHT = 32,
+    ICON_SIZE = 26,
+    RIGHT_WIDTH = 110,           -- columna de la derecha (dinero)
+    BUTTON_WIDTH = 130,          -- botón "Tabla de precios"
+    BUTTON_HEIGHT = 22,
+    COLORS = {
+        SUMMARY_BG = { 0, 0, 0, 0.35 },
+        SECTION = { 1, 0.82, 0 },
+        DIVIDER = { 1, 0.82, 0, 0.25 },
+        LABEL = { 0.65, 0.65, 0.65 },
+        DETAIL = { 0.75, 0.75, 0.75 },
+        ROW_BG = { 1, 1, 1, 0.04 },   -- una fila sí y otra no, para seguirlas
+    },
+}
+
+-- Botón del minimapa (UI/MinimapButton.lua, compartido). Las medidas y
+-- texturas son las del aro estándar de casi todos los addons. El ángulo por
+-- defecto es otro que el de FranTools y StreamDeckWoW, para no taparse.
+Const.MINIMAP = {
+    BUTTON_NAME = "FranFundirMinimapButton",
+    DEFAULT_ANGLE = 195,     -- grados desde la derecha, en sentido antihorario
+    EDGE_OFFSET = 5,
+    FRAME_LEVEL = 8,
+    SIZE = 31,
+    BORDER_SIZE = 53,
+    BORDER_TEXTURE = "Interface\\Minimap\\MiniMap-TrackingBorder",
+    BACKGROUND_SIZE = 20,
+    BACKGROUND_OFFSET = { 7, -5 },
+    BACKGROUND_TEXTURE = "Interface\\Minimap\\UI-Minimap-Background",
+    ICON_SIZE = 17,
+    ICON_OFFSET = { 7, -6 },
+    -- Máscara circular para que el icono (cuadrado) encaje en el aro.
+    ICON_MASK = "Interface\\CharacterFrame\\TempPortraitAlphaMask",
+    HIGHLIGHT_TEXTURE = "Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight",
 }
 
 -- Registro de errores de Lua (Core/ErrorLog.lua, compartido).

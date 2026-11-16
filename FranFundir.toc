@@ -14,7 +14,7 @@
 ## Interface: 16001
 
 ## Title: FranFundir
-## Notes: Con los precios de TradeSkillMaster, dice si te conviene vender cada mena y lingote o fundirlos (y en qué).|n/fundir
+## Notes: Con los precios de TradeSkillMaster, dice si te conviene vender cada mena y lingote o fundirlos (y en qué).|nBotón del minimapa o /fundir
 ## Author: fsegado
 # Versión del addon. Es la única fuente: el código la lee de aquí (Api.AddOnVersion).
 ## Version: 0.1.0
@@ -27,7 +27,7 @@
 # Variables que WoW guarda en disco:
 #   FranFundirDB   preferencias (fuentes de precio, ventana), para toda la cuenta
 #   FranFundirLog  errores de Lua apuntados (Core/ErrorLog.lua), para toda la cuenta
-#   FranFundirChar recetas que sabe cada personaje
+#   FranFundirChar recetas que sabe cada personaje y su botón del minimapa
 ## SavedVariables: FranFundirDB, FranFundirLog
 ## SavedVariablesPerCharacter: FranFundirChar
 
@@ -48,12 +48,19 @@ Core\Recipes.lua
 Core\RecipeScan.lua
 Core\Prices.lua
 Core\Planner.lua
-#   Interfaz
+Core\BagReport.lua
+#   Interfaz: piezas compartidas con FranTools
 UI\Tooltip.lua
 UI\Checkbox.lua
+UI\MinimapButton.lua
+#   Interfaz propia: textos, tooltip, aviso de recetas y ventanas
 UI\PlanText.lua
 UI\ItemTooltip.lua
 UI\RecipeNotice.lua
+UI\BaseWindow.lua
 UI\Window.lua
+UI\ReportLayout.lua
+UI\ReportWindow.lua
+UI\Minimap.lua
 #   Comandos de chat (usa todo lo anterior)
 Core\Commands.lua

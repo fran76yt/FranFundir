@@ -3,7 +3,8 @@
 Addon para **World of Warcraft Forever** que, con los precios de **TradeSkillMaster**, dice qué te conviene hacer con cada mena y cada lingote: **venderlo tal cual o fundirlo**, y en ese caso en qué. No mira solo un paso: un lingote de cobre puede valer más convertido en dos lingotes de bronce, y eso hace que la mena de cobre valga más fundida.
 
 - **En el tooltip** de cada mena y lingote: lo que te deja venderlo, la mejor opción con sus pasos y cuánto ganas respecto a vender.
-- **Una ventana** (`/fundir`) con todos los materiales, lo que llevas de cada uno y lo que ganarías con todo.
+- **Un informe de lo que llevas** (botón del minimapa o `/fundir`): mira las bolsas y te dice qué fundir, qué vender, qué te hace falta comprar y cuánto ganas con todo.
+- **Una tabla de precios** (clic derecho en el botón o `/fundir tabla`) con todos los materiales, los lleves o no.
 - **Todas las recetas** de Forever que gastan menas o lingotes: las de minería (fundir, aleaciones incluidas) y las transmutaciones de alquimia.
 - **Solo las recetas que sabe tu personaje**, o todas, si quieres ver qué daría aprenderlas.
 - **Las recetas se leen del juego** al abrir la ventana de minería o de alquimia: si Forever cambia una o añade otra, se usa la del juego y te avisa en el chat.
@@ -50,9 +51,54 @@ Todo es **por unidad** y con la comisión de la casa de subastas (5 %) ya descon
 Con espera (cada 1 h): Hierro fundido › Transmutar: hierro a oro › vender Lingote de oro — 9p 50c (+6p 65c)
 ```
 
-### Ventana
+### Informe de lo que llevas
 
-`/fundir` abre o cierra una tabla con cada material:
+**Clic en el botón del minimapa** (el lingote de bronce) o `/fundir`: el addon mira las menas y lingotes de tus bolsas y te dice qué hacer con ellos.
+
+```
+ Venderlo tal cual    Siguiendo los consejos        Ganas
+      38p 55c                56p 36c               +17p 81c
+
+ Fundir y fabricar                                    Te deja · ganas
+ ──────────────────────────────────────────────────────────────────
+ [icono] 10 Mena de cobre                                    19p 40c
+         Cobre fundido › Bronce fundido › vender 20 ...      +9p 90c
+
+ Para eso te hace falta                           Cuesta lo que falta
+ ──────────────────────────────────────────────────────────────────
+ [icono] 10 Lingote de estaño                                 5p 40c
+         Llevas 4, faltan 6                                  comprar
+
+ Vender tal cual · Aún mejor, con espera · Sin precio ...
+
+ [x] Contar también las recetas que no sé        [Tabla de precios]
+ Precios de TSM. Venta: dbmarket (menos el 5% de comisión). Compra: ...
+```
+
+- **Arriba, el resumen**: lo que sacarías vendiéndolo todo tal cual, lo que sacas siguiendo los consejos y la diferencia.
+- **Fundir y fabricar**: lo que deja más convertido en otra cosa, con los pasos y **cuántos salen de verdad**. Solo cuenta recetas enteras: de 13 menas de hierro negro sale 1 lingote y sobran 5, y si aún no llega para una, dice cuántas faltan. Lo que más gana va arriba.
+- **Para eso te hace falta**: lo demás que piden esas recetas (el estaño del bronce, el carbón del acero), sumado, con lo que ya llevas y lo que cuesta comprar lo que falta.
+- **Vender tal cual**: lo que mejor se vende sin tocarlo.
+- **Aún mejor, con espera**: si una transmutación deja más, por unidad y con su tiempo de espera (no sirve para todo el montón).
+- **Sin precio**: lo que TSM aún no sabe valorar.
+
+Al pasar el ratón por una fila sale el tooltip del objeto. El informe se pone al día solo al cambiar lo que llevas, y la ventana crece o encoge según lo que haya que enseñar.
+
+Lo que pide una receta se valora a precio de compra, cada material por separado. Si llevas lingotes de estaño, el informe puede aconsejarte hacer bronce con ellos y, a la vez, contarlos para el bronce del cobre. La sección «Para eso te hace falta» lo deja a la vista.
+
+### Botón del minimapa
+
+| Acción | Qué hace |
+|---|---|
+| Clic | Abre o cierra el informe de lo que llevas |
+| Clic derecho | Abre o cierra la tabla de precios |
+| Arrastrar | Lo mueve alrededor del minimapa |
+
+`/fundir minimapa` lo oculta o lo vuelve a mostrar. Cada personaje recuerda dónde lo dejaste.
+
+### Tabla de precios
+
+`/fundir tabla` (o clic derecho en el botón) abre o cierra una tabla con cada material:
 
 | Columna | Qué es |
 |---|---|
@@ -71,7 +117,9 @@ Abajo, la casilla **Contar también las recetas que no sé** calcula como si las
 
 | Comando | Qué hace |
 |---|---|
-| `/fundir` | Abre o cierra la tabla de materiales |
+| `/fundir` | Abre o cierra el informe de lo que llevas |
+| `/fundir tabla` | Abre o cierra la tabla de precios de todos los materiales |
+| `/fundir minimapa` | Oculta o vuelve a mostrar el botón del minimapa |
 | `/fundir venta <precio de TSM>` | Con qué precio de TSM se vende. Por defecto `dbmarket`. Ejemplo: `/fundir venta dbminbuyout`. Sin nada, vuelve al de por defecto |
 | `/fundir compra <precio de TSM>` | Con qué precio se compra lo que piden las recetas además del material (el estaño del bronce, el carbón del acero). Por defecto `min(vendorbuy, dbmarket)`: lo más barato entre el vendedor y la subasta |
 | `/fundir recetas` | Qué recetas tiene en cuenta, cuáles sabe este personaje y cuáles ha cambiado o añadido el juego |
@@ -105,7 +153,7 @@ Detalles:
 - **Lo demás que pide una receta** se valora a precio de compra: lo que cuesta tenerlo o, si ya lo tienes, lo que dejas de ganar al no venderlo.
 - **Sin precio** de algo que hace falta, esa opción no se cuenta.
 - Solo se cambia de opción si deja al menos 1 cobre más: con un empate, mejor vender y no complicarse.
-- **Las recetas con tiempo de espera** (las transmutaciones) no sirven para un montón de menas: la ventana no las cuenta y el tooltip las enseña aparte, con su espera.
+- **Las recetas con tiempo de espera** (las transmutaciones) no sirven para un montón de menas: las ventanas no las cuentan en el plan y las enseñan aparte, con su espera, igual que el tooltip.
 
 ---
 
@@ -154,7 +202,7 @@ Solo se pueden leer las profesiones que tiene el personaje que abre la ventana (
 
 ## El addon por dentro
 
-Todos los archivos reciben la misma tabla privada (`local _, ns = ...`). Las únicas globales son las que exige WoW (el comando, la ventana `FranFundirWindow` para cerrarla con Escape) y `FranFundir`, que expone esa tabla para inspeccionarla con `/dump`.
+Todos los archivos reciben la misma tabla privada (`local _, ns = ...`). Las únicas globales son las que exige WoW (el comando, las ventanas `FranFundirReport` y `FranFundirWindow` para cerrarlas con Escape, el botón `FranFundirMinimapButton`) y `FranFundir`, que expone esa tabla para inspeccionarla con `/dump`.
 
 | Archivo | Qué hace |
 |---|---|
@@ -168,19 +216,24 @@ Todos los archivos reciben la misma tabla privada (`local _, ns = ...`). Las ún
 | [`Core/Recipes.lua`](Core/Recipes.lua) | Las recetas combinadas (las del juego mandan sobre las de los datos), qué gasta cada material y cuáles sabe el personaje |
 | [`Core/RecipeScan.lua`](Core/RecipeScan.lua) | Lee la ventana de la profesión al abrirla: qué recetas sabe y lo que gasta y da cada una según el juego |
 | [`Core/Prices.lua`](Core/Prices.lua) | Precio de venta (menos la comisión, o el del vendedor) y de compra; fuentes de TSM configurables |
-| [`Core/Planner.lua`](Core/Planner.lua) | El cálculo: el mejor plan para cada material, aparte el que usa recetas con espera |
-| [`UI/Tooltip.lua`](UI/Tooltip.lua), [`UI/Checkbox.lua`](UI/Checkbox.lua) | *Compartidos con FranTools.* Tooltips de ayuda y casillas |
+| [`Core/Planner.lua`](Core/Planner.lua) | El cálculo: el mejor plan para cada material, aparte el que usa recetas con espera, y las cantidades de verdad con lo que llevas |
+| [`Core/BagReport.lua`](Core/BagReport.lua) | El informe de las bolsas: qué fundir, qué vender, qué hace falta comprar y los totales |
+| [`UI/Tooltip.lua`](UI/Tooltip.lua), [`UI/Checkbox.lua`](UI/Checkbox.lua), [`UI/MinimapButton.lua`](UI/MinimapButton.lua) | *Compartidos con FranTools.* Tooltips de ayuda, casillas y el botón del minimapa |
 | [`UI/PlanText.lua`](UI/PlanText.lua) | Un plan en texto: pasos, dinero, ganancia y espera |
 | [`UI/ItemTooltip.lua`](UI/ItemTooltip.lua) | Las líneas del tooltip de menas y lingotes |
 | [`UI/RecipeNotice.lua`](UI/RecipeNotice.lua) | El aviso en el chat de una receta cambiada o nueva en el juego |
-| [`UI/Window.lua`](UI/Window.lua) | La tabla de `/fundir` |
+| [`UI/BaseWindow.lua`](UI/BaseWindow.lua) | Lo común a las dos ventanas: marco que se mueve y recuerda su sitio, ponerse al día, tooltip de las filas y la casilla de las recetas |
+| [`UI/Window.lua`](UI/Window.lua) | La tabla de precios (`/fundir tabla`) |
+| [`UI/ReportLayout.lua`](UI/ReportLayout.lua) | El informe convertido en bloques (resumen, secciones, filas, avisos), sin tocar la interfaz |
+| [`UI/ReportWindow.lua`](UI/ReportWindow.lua) | La ventana del informe: pinta los bloques reutilizando sus marcos |
+| [`UI/Minimap.lua`](UI/Minimap.lua) | El botón del minimapa de este addon: qué hace cada clic |
 | [`Core/Commands.lua`](Core/Commands.lua) | Los comandos `/fundir` |
 
 Los archivos compartidos se editan en [FranTools](https://github.com/fran76yt/FranTools) y se copian aquí con su `tools/sync_shared.py`.
 
 ### Pruebas
 
-El addon se puede probar sin abrir el juego: [`tests/run.js`](tests/run.js) carga sus archivos en el orden del `.toc`, como hace WoW, sobre una API del juego simulada en Lua, y ejecuta las pruebas de [`tests/test.lua`](tests/test.lua): precios, el cálculo con sus cadenas de recetas, el tooltip, la ventana, los comandos y la lectura de recetas del juego (cambiadas, nuevas, sin aprender, cliente antiguo). Hace falta [Node.js](https://nodejs.org/).
+El addon se puede probar sin abrir el juego: [`tests/run.js`](tests/run.js) carga sus archivos en el orden del `.toc`, como hace WoW, sobre una API del juego simulada en Lua, y ejecuta las pruebas de [`tests/test.lua`](tests/test.lua): precios, el cálculo con sus cadenas de recetas, el tooltip, el informe de las bolsas, las dos ventanas, el botón del minimapa, los comandos y la lectura de recetas del juego (cambiadas, nuevas, sin aprender, cliente antiguo). Hace falta [Node.js](https://nodejs.org/).
 
 ```bash
 cd tests
@@ -214,13 +267,15 @@ Solo se guarda lo que has cambiado:
 FranFundirDB = {                       -- toda la cuenta
     ["sellSource"] = "dbminbuyout",     -- precio de venta, si no es el de por defecto
     ["allRecipes"] = true,              -- contar también las recetas que no sabes
-    ["point"] = { "CENTER", "CENTER", 0, 0 },   -- posición de la ventana
+    ["point"] = { "CENTER", "CENTER", 0, 0 },         -- posición de la tabla
+    ["reportPoint"] = { "CENTER", "CENTER", 0, 0 },   -- y la del informe
     ["gameRecipes"] = {                 -- recetas leídas del juego, por hechizo
         [2659] = { ["reagents"] = { { 2840, 1 }, { 3576, 1 } }, ["output"] = { 2841, 2 } },
     },
 }
 FranFundirChar = {                     -- cada personaje
     ["known"] = { [2657] = true, [2659] = true, [3569] = false },   -- sabe (true) o sale sin aprender (false)
+    ["minimap"] = { ["angle"] = 195 },  -- botón del minimapa (y hidden, si lo ocultas)
 }
 ```
 
@@ -244,16 +299,22 @@ FranFundir/
 │   ├── RecipeScan.lua                 leer las recetas de la ventana de la profesión
 │   ├── Prices.lua                     precios de venta y compra
 │   ├── Planner.lua                    el cálculo
+│   ├── BagReport.lua                  el informe de lo que llevas
 │   └── Commands.lua                   comandos /fundir
 ├── Data/
 │   └── Recipes.lua                    recetas de minería y alquimia
 ├── UI/
 │   ├── Tooltip.lua                    tooltips de ayuda (compartido)
 │   ├── Checkbox.lua                   casillas (compartido)
+│   ├── MinimapButton.lua              botón del minimapa (compartido)
 │   ├── PlanText.lua                   planes en texto
 │   ├── ItemTooltip.lua                líneas del tooltip de los materiales
 │   ├── RecipeNotice.lua               aviso de recetas cambiadas o nuevas
-│   └── Window.lua                     la tabla de /fundir
+│   ├── BaseWindow.lua                 lo común a las dos ventanas
+│   ├── Window.lua                     la tabla de precios
+│   ├── ReportLayout.lua               el informe en bloques
+│   ├── ReportWindow.lua               la ventana del informe
+│   └── Minimap.lua                    qué hace el botón del minimapa
 └── tests/                             pruebas fuera del juego (WoW no lo carga)
     ├── test.lua                       las pruebas
     ├── stubs.lua                      TSM y profesiones simulados

@@ -114,19 +114,95 @@ TSM_API = nil
 check(tooltipFor(I.COPPER_ORE):find("hace falta TradeSkillMaster", 1, true), "sin TSM lo dice")
 TSM_API = savedTsm
 
--- ventana
+-- tabla de precios
 bags[I.COPPER_ORE] = 10
-SlashCmdList.FRANFUNDIR("")
+SlashCmdList.FRANFUNDIR("tabla")
 runTimers()
 local win = _G.FranFundirWindow
-check(win and rawget(win, "_shown") == true, "/fundir abre la ventana")
+check(win and rawget(win, "_shown") == true, "/fundir tabla abre la tabla")
 local rows = ns.Window.Rows()
 check(#rows == #ns.Data.MATERIALS, "una fila por material")
 check(rows[1].name == "Mena de cobre" and rows[1].best == "Lingote de bronce" and rows[1].sell == "95c" and rows[1].value == "1p 94c", "fila del cobre: vender, mejor opción y lo que deja")
 check(rows[1].count == "10" and rows[1].gain:find("9p 90c", 1, true), "con 10 menas ganas 9p 90c sobre venderlas")
 check(rows[7].best == "Vender" and rows[7].gain == "", "lingote de hierro: vender, sin ganancia")
-SlashCmdList.FRANFUNDIR("")
+SlashCmdList.FRANFUNDIR("tabla")
 check(rawget(win, "_shown") == false, "otra vez la cierra")
+
+-- cantidades de verdad: solo recetas enteras
+Planner.SetCountsAllRecipes(true)
+local q = Planner.Quantities(Planner.Best(I.DARK_IRON_ORE), 13)
+check(q.final[1] == I.DARK_IRON_BAR and q.final[2] == 1 and q.leftover == 5 and q.per == 8, "13 menas de hierro negro: 1 lingote y sobran 5")
+Planner.SetCountsAllRecipes(false)
+q = Planner.Quantities(Planner.Best(I.COPPER_ORE), 10)
+check(q.final[1] == I.BRONZE_BAR and q.final[2] == 20 and q.needs[1][1] == I.TIN_BAR and q.needs[1][2] == 10, "10 menas de cobre: 20 bronces con 10 lingotes de estaño")
+
+-- informe de las bolsas
+names[I.TIN_BAR], names[I.IRON_ORE], names[I.ELEMENTIUM_ORE] = "Lingote de estaño", "Mena de hierro", "Mena de elementium"
+bags[I.IRON_ORE], bags[I.IRON_BAR], bags[I.TIN_BAR], bags[I.ELEMENTIUM_ORE] = 5, 3, 4, 2
+local report = ns.BagReport.Build()
+check(#report.craft == 3 and report.craft[1].id == I.COPPER_ORE and report.craft[2].id == I.IRON_ORE and report.craft[3].id == I.TIN_BAR, "fundir: cobre, hierro y estaño, lo que más gana arriba")
+check(#report.sell == 1 and report.sell[1].id == I.IRON_BAR and #report.noPrice == 1 and report.noPrice[1].id == I.ELEMENTIUM_ORE, "vender el lingote de hierro; el elementium, sin precio")
+check(#report.cooldown == 2, "la mena y el lingote de hierro, mejor aún transmutando")
+local tin, copperBar = report.needs[1], report.needs[2]
+check(tin.id == I.TIN_BAR and tin.quantity == 10 and tin.have == 4 and tin.missing == 6 and tin.cost == 540, "hacen falta 10 lingotes de estaño: llevas 4, comprar 6 cuesta 540")
+check(copperBar.id == I.COPPER_BAR and copperBar.quantity == 4 and copperBar.missing == 4, "y 4 de cobre para el estaño que llevas")
+-- 10 cobre (95 / 194), 5 hierro (285 / 380), 4 estaño (85 / 164) y 3 lingotes de hierro (380)
+check(report.totals.sell == 3855 and report.totals.plan == 5636 and report.totals.gain == 1781, "totales: 38p 55c vendiéndolo, 56p 36c con los consejos, ganas 17p 81c")
+
+local blocks = ns.ReportWindow.Blocks()
+local function kinds() local k = {} for i, b in ipairs(blocks) do k[i] = b.kind end return table.concat(k, ",") end
+check(kinds() == "summary,section,item,item,item,section,item,item,section,item,section,item,item,section,item", "bloques: resumen y cinco secciones")
+check(blocks[1].cells[3].value:find("17p 81c", 1, true), "el resumen dice lo que ganas")
+local copper = blocks[3]
+check(copper.title == "10 Mena de cobre" and copper.detail == "Cobre fundido › Bronce fundido › vender 20 Lingote de bronce", "fila del cobre: cuántas y qué hacer, con cuántos bronces salen")
+check(copper.right == "19p 40c" and copper.rightDetail:find("9p 90c", 1, true), "y lo que deja y ganas")
+check(blocks[7].detail == "Llevas 4, faltan 6" and blocks[7].right == "5p 40c", "lo que falta y lo que cuesta")
+check(blocks[10].detail == "Vender a 3p 80c cada uno" and blocks[10].right == "11p 40c", "vender tal cual")
+check(blocks[12].detail:find("Transmutar: hierro a oro", 1, true) and blocks[12].detail:find("cada 1 h", 1, true), "con espera: la transmutación y cada cuánto")
+check(blocks[15].detail == "TSM aún no tiene precio de esto.", "sin precio lo dice")
+
+bags[I.DARK_IRON_ORE] = 5
+Planner.SetCountsAllRecipes(true)
+local function blockFor(id) for _, b in ipairs(ns.ReportWindow.Blocks()) do if b.id == id then return b end end end
+check(blockFor(I.DARK_IRON_ORE).detail:find("^Faltan 3 para la primera"), "5 menas de hierro negro: faltan 3 para el primer lingote")
+Planner.SetCountsAllRecipes(false)
+bags[I.DARK_IRON_ORE] = nil
+
+-- la ventana del informe
+SlashCmdList.FRANFUNDIR("")
+local rep = _G.FranFundirReport
+check(rep and rawget(rep, "_shown") == true, "/fundir abre el informe")
+-- Si algún texto de la interfaz dice esto (los marcos simulados se apuntan en frames).
+local function painted(text) for _, f in ipairs(frames) do if rawget(f, "_text") == text then return true end end end
+check(painted("10 Mena de cobre") and painted("Fundir y fabricar") and painted("Tabla de precios"), "pinta las filas, las secciones y el botón")
+bags[I.COPPER_ORE] = 12
+step("BAG_UPDATE_DELAYED")
+check(painted("12 Mena de cobre"), "se pone al día al cambiar las bolsas")
+bags[I.COPPER_ORE] = 10
+SlashCmdList.FRANFUNDIR("")
+check(rawget(rep, "_shown") == false, "otra vez lo cierra")
+
+local savedBags = bags
+bags = {}
+local empty = ns.ReportWindow.Blocks()
+check(#empty == 1 and empty[1].text == "No llevas menas ni lingotes en las bolsas.", "sin nada en las bolsas lo dice")
+bags = savedBags
+
+-- botón del minimapa
+fire("PLAYER_LOGIN")
+local button = _G.FranFundirMinimapButton
+check(button ~= nil, "crea el botón del minimapa")
+rawget(button, "_OnClick")(button, "LeftButton")
+check(rawget(rep, "_shown") == true, "clic: el informe")
+rawget(button, "_OnClick")(button, "RightButton")
+check(rawget(win, "_shown") == true, "clic derecho: la tabla")
+rawget(button, "_OnClick")(button, "LeftButton")
+rawget(button, "_OnClick")(button, "RightButton")
+printed = {}
+SlashCmdList.FRANFUNDIR("minimapa")
+check(FranFundirChar.minimap.hidden == true and rawget(button, "_shown") == false and hasPrinted("oculto"), "/fundir minimapa lo oculta")
+SlashCmdList.FRANFUNDIR("minimapa")
+check(not FranFundirChar.minimap.hidden and rawget(button, "_shown") == true, "y lo vuelve a mostrar")
 
 -- comandos
 printed = {}

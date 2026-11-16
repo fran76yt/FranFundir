@@ -2,7 +2,9 @@
 Comandos de chat
 ================
 
-  /fundir               abrir o cerrar la ventana de materiales
+  /fundir               abrir o cerrar el informe de lo que llevas
+  /fundir tabla         abrir o cerrar la tabla de todas las menas y lingotes
+  /fundir minimapa      ocultar o mostrar el botón del minimapa
   /fundir venta <TSM>   precio de venta de TSM ("dbmarket", "dbminbuyout"...);
                         sin nada, vuelve al de por defecto
   /fundir compra <TSM>  precio de compra de lo demás que piden las recetas
@@ -53,13 +55,24 @@ function commands.recetas()
     print("  Se leen del juego al abrir la ventana de minería o de alquimia.")
 end
 
+function commands.tabla()
+    ns.Window.Toggle()
+end
+
+function commands.minimapa()
+    local shown = ns.Minimap:ToggleShown()
+    Util.Print(shown and "botón del minimapa visible." or "botón del minimapa oculto. /fundir minimapa para recuperarlo.")
+end
+
 function commands.errores(arg)
     ns.ErrorLog.Command(arg)
 end
 
 function commands.ayuda()
     Util.Print("versión %s. Comandos:", Api.AddOnVersion())
-    print("  /fundir  -  abrir la tabla de menas y lingotes")
+    print("  /fundir  -  qué hacer con las menas y lingotes que llevas")
+    print("  /fundir tabla  -  tabla de precios de todas las menas y lingotes")
+    print("  /fundir minimapa  -  ocultar o mostrar el botón del minimapa")
     print(("  /fundir venta <precio de TSM>  -  con qué precio de TSM se vende (ahora %s)"):format(Prices.Source("sell")))
     print(("  /fundir compra <precio de TSM>  -  con qué precio se compra lo que piden las recetas (ahora %s)"):format(Prices.Source("buy")))
     print("  /fundir recetas  -  qué recetas sabe este personaje")
@@ -67,8 +80,8 @@ function commands.ayuda()
     print("  /fundir ayuda  -  esta ayuda")
 end
 
--- Sin argumentos: la ventana.
-commands[""] = function() ns.Window.Toggle() end
+-- Sin argumentos: el informe, lo que más se usa.
+commands[""] = function() ns.ReportWindow.Toggle() end
 
 local Commands = {}
 ns.Commands = Commands

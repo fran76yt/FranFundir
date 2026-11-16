@@ -81,7 +81,7 @@ end
 
 -- La lista de recetas llega poco a poco al abrir la ventana: se lee al
 -- terminar la ráfaga de eventos.
-local scanSoon = Util.Debounce(Const.WINDOW.UPDATE_DELAY, RecipeScan.ScanOpenWindow)
+local scanSoon = Util.Debounce(Const.FRAME.UPDATE_DELAY, RecipeScan.ScanOpenWindow)
 for _, event in ipairs({ "TRADE_SKILL_SHOW", "TRADE_SKILL_LIST_UPDATE", "TRADE_SKILL_UPDATE" }) do
     Util.On(event, scanSoon)
 end

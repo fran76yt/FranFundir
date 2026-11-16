@@ -51,20 +51,20 @@ end
 
 function ItemTooltip.Lines(id)
     if not Recipes.IsMaterial(id) then return {} end
-    local lines = { line(Const.WINDOW.TITLE, T.TITLE_COLOR) }
+    local lines = { line(Const.FRAME.TITLE, T.TITLE_COLOR) }
     if not Tsm.IsAvailable() then
-        lines[#lines + 1] = line("Sin precios: hace falta TradeSkillMaster.", T.HINT_COLOR)
+        lines[#lines + 1] = line(Const.TEXT.NO_TSM, T.HINT_COLOR)
         return lines
     end
     local compare = Planner.Compare(id)
     if not compare.sell and not compare.bulk then
-        lines[#lines + 1] = line("TSM aún no tiene precio de esto.", T.HINT_COLOR)
+        lines[#lines + 1] = line(Const.TEXT.NO_PRICE, T.HINT_COLOR)
         return lines
     end
     if compare.sell then lines[#lines + 1] = line("Vender: " .. PlanText.Money(compare.sell)) end
     bestLines(lines, compare)
     if not Planner.CountsAllRecipes() and not Recipes.HasAnyKnown() then
-        lines[#lines + 1] = line("Abre la ventana de minería una vez para que sepa tus recetas.", T.HINT_COLOR)
+        lines[#lines + 1] = line(Const.TEXT.OPEN_PROFESSION, T.HINT_COLOR)
     end
     return lines
 end
