@@ -1,0 +1,59 @@
+# ---------------------------------------------------------------------------
+# Archivo TOC ("Table of Contents") del addon.
+#
+# WoW busca en Interface\AddOns\<Carpeta>\<Carpeta>.toc: el nombre del archivo
+# tiene que coincidir con el de la carpeta o el addon no aparece en la lista.
+#
+# Las líneas "## Clave: valor" son metadatos que lee el cliente.
+# Las líneas que empiezan por un solo "#" son comentarios y se ignoran.
+# El resto de líneas son los archivos de código, que se cargan en este orden.
+# ---------------------------------------------------------------------------
+
+# Versión de la interfaz para la que está hecho el addon. El valor real se
+# consulta en el juego con: /dump select(4, GetBuildInfo())
+## Interface: 16001
+
+## Title: FranFundir
+## Notes: Con los precios de TradeSkillMaster, dice si te conviene vender cada mena y lingote o fundirlos (y en qué).|n/fundir
+## Author: fsegado
+# Versión del addon. Es la única fuente: el código la lee de aquí (Api.AddOnVersion).
+## Version: 0.1.0
+## IconTexture: Interface\Icons\INV_Ingot_Bronze
+
+# Los precios salen de TSM: se carga antes si está, pero no es obligatorio
+# (sin él, el addon lo dice y no calcula nada).
+## OptionalDeps: TradeSkillMaster
+
+# Variables que WoW guarda en disco:
+#   FranFundirDB   preferencias (fuentes de precio, ventana), para toda la cuenta
+#   FranFundirLog  errores de Lua apuntados (Core/ErrorLog.lua), para toda la cuenta
+#   FranFundirChar recetas que sabe cada personaje
+## SavedVariables: FranFundirDB, FranFundirLog
+## SavedVariablesPerCharacter: FranFundirChar
+
+# Orden de carga: cada módulo usa los que se han cargado antes que él.
+#   Constantes y utilidades genéricas (compartidas con FranTools)
+Core\Constants.lua
+Core\Util.lua
+Core\Api.lua
+#   Registro de errores: lo antes posible, para que apunte también los
+#   errores al cargar los archivos siguientes
+Core\ErrorLog.lua
+#   Datos guardados y acceso a TSM
+Core\Storage.lua
+Core\Tsm.lua
+#   Recetas (datos y cuáles sabes), precios y el cálculo
+Data\Recipes.lua
+Core\Recipes.lua
+Core\RecipeScan.lua
+Core\Prices.lua
+Core\Planner.lua
+#   Interfaz
+UI\Tooltip.lua
+UI\Checkbox.lua
+UI\PlanText.lua
+UI\ItemTooltip.lua
+UI\RecipeNotice.lua
+UI\Window.lua
+#   Comandos de chat (usa todo lo anterior)
+Core\Commands.lua
