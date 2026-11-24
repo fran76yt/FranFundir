@@ -38,7 +38,7 @@ function Prices.SetSource(which, source)
     local valid, reason = Tsm.IsValidSource(source)
     if not valid then return false, reason end
     Util.SetOverride(Storage.Settings(), SETTING[which], source, DEFAULT[which])
-    Util.Fire(Const.MSG.SETTINGS_CHANGED)
+    Util.Fire(Util.SETTINGS_CHANGED)
     return true
 end
 

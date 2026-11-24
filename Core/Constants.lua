@@ -7,11 +7,10 @@ y una tabla privada que comparten todos sus archivos. Usamos esa tabla (ns,
 "namespace") para repartir el código en módulos sin crear variables globales,
 que podrían chocar con otros addons.
 
-Los archivos compartidos con FranTools (Core/Util.lua, Core/Api.lua,
-Core/ErrorLog.lua, UI/Tooltip.lua, UI/Checkbox.lua y UI/MinimapButton.lua,
-que se editan en FranTools y se copian con su tools/sync_shared.py) leen de
-aquí ADDON_NAME, ICON, MSG.SETTINGS_CHANGED, CHAT_PREFIX, UI
-(TOOLTIP_HELP_COLOR y las medidas de las casillas), MINIMAP y ERROR_LOG.
+El código común con los otros addons (utilidades, API del juego, registro
+de errores, tooltips, casillas y botón del minimapa) está en la librería
+FranLib, incrustada en Libs/FranLib. Lo que necesita saber de este addon se
+lo dice ns.FranLibConfig, al final de este archivo.
 ]]
 
 local addonName, ns = ...
@@ -27,7 +26,6 @@ Const.ICON = "Interface\\Icons\\INV_Ingot_Bronze"
 
 -- Mensajes internos entre módulos (Util.Listen / Util.Fire).
 Const.MSG = {
-    SETTINGS_CHANGED = "FRANFUNDIR_SETTINGS_CHANGED",   -- cambia una preferencia
     RECIPES_CHANGED = "FRANFUNDIR_RECIPES_CHANGED",     -- cambian las recetas que sabes o lo que hacen
     RECIPES_READ = "FRANFUNDIR_RECIPES_READ",           -- leída una ventana de profesión (y qué recetas cambian)
 }
@@ -61,11 +59,7 @@ Const.TEXT = {
 
 -- Interfaz.
 Const.UI = {
-    TOOLTIP_HELP_COLOR = { 0.8, 0.8, 0.8 },
     -- Casillas (UI/Checkbox.lua, compartido).
-    CHECK_SIZE = 24,
-    CHECK_LABEL_GAP = 2,
-    CHECK_ICON_SIZE = 16,
 }
 
 -- Líneas que se añaden al tooltip de las menas y lingotes.
@@ -134,32 +128,12 @@ Const.REPORT = {
     },
 }
 
--- Botón del minimapa (UI/MinimapButton.lua, compartido). Las medidas y
--- texturas son las del aro estándar de casi todos los addons. El ángulo por
--- defecto es otro que el de FranTools y StreamDeckWoW, para no taparse.
-Const.MINIMAP = {
-    BUTTON_NAME = "FranFundirMinimapButton",
-    DEFAULT_ANGLE = 195,     -- grados desde la derecha, en sentido antihorario
-    EDGE_OFFSET = 5,
-    FRAME_LEVEL = 8,
-    SIZE = 31,
-    BORDER_SIZE = 53,
-    BORDER_TEXTURE = "Interface\\Minimap\\MiniMap-TrackingBorder",
-    BACKGROUND_SIZE = 20,
-    BACKGROUND_OFFSET = { 7, -5 },
-    BACKGROUND_TEXTURE = "Interface\\Minimap\\UI-Minimap-Background",
-    ICON_SIZE = 17,
-    ICON_OFFSET = { 7, -6 },
-    -- Máscara circular para que el icono (cuadrado) encaje en el aro.
-    ICON_MASK = "Interface\\CharacterFrame\\TempPortraitAlphaMask",
-    HIGHLIGHT_TEXTURE = "Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight",
-}
-
--- Registro de errores de Lua (Core/ErrorLog.lua, compartido).
-Const.ERROR_LOG = {
-    SAVED_VAR = "FranFundirLog",   -- variable de la cuenta (## SavedVariables del .toc)
-    COMMAND = "/fundir errores",   -- para el aviso del chat y la ayuda
-    MAX_ENTRIES = 50,              -- errores distintos que se guardan como mucho
-    MAX_STACK_CHARS = 2000,        -- tope de la pila de cada uno, para no inflar el archivo
-    STACK_COLOR = "999999",        -- gris para la pila en el chat
+-- Lo que FranLib (Libs/FranLib, ver su Config.lua) necesita saber de este
+-- addon: con qué icono y prefijo habla en el chat, dónde apunta sus errores y
+-- cómo se llama su botón del minimapa.
+ns.FranLibConfig = {
+    icon = Const.ICON,
+    chatPrefix = Const.CHAT_PREFIX,
+    errorLog = { savedVar = "FranFundirLog", command = "/fundir errores" },
+    minimap = { buttonName = "FranFundirMinimapButton", defaultAngle = 195 },
 }

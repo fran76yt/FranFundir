@@ -48,7 +48,7 @@ end
 
 function Planner.SetCountsAllRecipes(on)
     Storage.Settings().allRecipes = on or nil
-    Util.Fire(Const.MSG.SETTINGS_CHANGED)
+    Util.Fire(Util.SETTINGS_CHANGED)
 end
 
 --------------------------------------------------------------------------------

@@ -95,7 +95,7 @@ end
 function BaseWindow.RefreshOn(fn)
     local soon = Util.Debounce(Const.FRAME.UPDATE_DELAY, fn)
     for _, event in ipairs({ "BAG_UPDATE_DELAYED", "GET_ITEM_INFO_RECEIVED" }) do Util.On(event, soon) end
-    Util.Listen(Const.MSG.SETTINGS_CHANGED, soon)
+    Util.Listen(Util.SETTINGS_CHANGED, soon)
     Util.Listen(Const.MSG.RECIPES_CHANGED, soon)
 end
 

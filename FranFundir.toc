@@ -32,13 +32,18 @@
 ## SavedVariablesPerCharacter: FranFundirChar
 
 # Orden de carga: cada módulo usa los que se han cargado antes que él.
-#   Constantes y utilidades genéricas (compartidas con FranTools)
+#   Constantes del addon (y lo que FranLib necesita saber de él)
 Core\Constants.lua
-Core\Util.lua
-Core\Api.lua
-#   Registro de errores: lo antes posible, para que apunte también los
-#   errores al cargar los archivos siguientes
-Core\ErrorLog.lua
+#   Librería común (Libs/FranLib, copia del repositorio FranLib): utilidades,
+#   API del juego, registro de errores (lo antes posible, para que apunte
+#   también los errores al cargar lo demás) y componentes de interfaz
+Libs\FranLib\Config.lua
+Libs\FranLib\Util.lua
+Libs\FranLib\Api.lua
+Libs\FranLib\ErrorLog.lua
+Libs\FranLib\Tooltip.lua
+Libs\FranLib\Checkbox.lua
+Libs\FranLib\MinimapButton.lua
 #   Datos guardados y acceso a TSM
 Core\Storage.lua
 Core\Tsm.lua
@@ -50,10 +55,6 @@ Core\Prices.lua
 Core\Planner.lua
 Core\Production.lua
 Core\BagReport.lua
-#   Interfaz: piezas compartidas con FranTools
-UI\Tooltip.lua
-UI\Checkbox.lua
-UI\MinimapButton.lua
 #   Interfaz propia: textos, tooltip, aviso de recetas y ventanas
 UI\PlanText.lua
 UI\ItemTooltip.lua

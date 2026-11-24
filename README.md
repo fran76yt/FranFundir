@@ -216,9 +216,7 @@ Todos los archivos reciben la misma tabla privada (`local _, ns = ...`). Las ún
 | Archivo | Qué hace |
 |---|---|
 | [`Core/Constants.lua`](Core/Constants.lua) | Constantes: comisión, precios de TSM por defecto, medidas y textos de la interfaz |
-| [`Core/Util.lua`](Core/Util.lua) | *Compartido con FranTools.* Utilidades: eventos protegidos, mensajes entre módulos, *debounce*, chat |
-| [`Core/Api.lua`](Core/Api.lua) | *Compartido con FranTools.* Única puerta a la API del juego: objetos y sus tooltips, recetas de la profesión abierta, dinero… |
-| [`Core/ErrorLog.lua`](Core/ErrorLog.lua) | *Compartido con FranTools.* Registro de errores de Lua (`/fundir errores`) |
+| [`Libs/FranLib/`](Libs/FranLib) | *Librería común FranLib, incrustada (es una copia: se edita en el repositorio FranLib).* Utilidades (llamadas protegidas con `Util.SafeCall`, eventos, mensajes entre módulos, interruptores de opciones, chat), la única puerta a la API del juego, el registro de errores (`/fundir errores`), tooltips de ayuda, casillas y el botón del minimapa |
 | [`Core/Storage.lua`](Core/Storage.lua) | Único módulo que toca las SavedVariables de preferencias y recetas |
 | [`Core/Tsm.lua`](Core/Tsm.lua) | Única puerta a TradeSkillMaster (`TSM_API`): precios y validar fórmulas, sin errores de Lua si falta algo |
 | [`Data/Recipes.lua`](Data/Recipes.lua) | Las recetas y la lista de materiales, con sus IDs comprobados |
@@ -228,7 +226,6 @@ Todos los archivos reciben la misma tabla privada (`local _, ns = ...`). Las ún
 | [`Core/Planner.lua`](Core/Planner.lua) | El cálculo: el mejor plan para cada material, aparte el que usa recetas con espera |
 | [`Core/Production.lua`](Core/Production.lua) | Sigue los planes con todo lo que llevas junto: por orden, recetas enteras, lo que llevas antes que comprar |
 | [`Core/BagReport.lua`](Core/BagReport.lua) | El informe de las bolsas: los pasos, qué vender, qué comprar y los totales |
-| [`UI/Tooltip.lua`](UI/Tooltip.lua), [`UI/Checkbox.lua`](UI/Checkbox.lua), [`UI/MinimapButton.lua`](UI/MinimapButton.lua) | *Compartidos con FranTools.* Tooltips de ayuda, casillas y el botón del minimapa |
 | [`UI/PlanText.lua`](UI/PlanText.lua) | Un plan en texto: pasos, dinero, ganancia y espera |
 | [`UI/ItemTooltip.lua`](UI/ItemTooltip.lua) | Las líneas del tooltip de menas y lingotes |
 | [`UI/RecipeNotice.lua`](UI/RecipeNotice.lua) | El aviso en el chat de una receta cambiada o nueva en el juego |
@@ -239,7 +236,7 @@ Todos los archivos reciben la misma tabla privada (`local _, ns = ...`). Las ún
 | [`UI/Minimap.lua`](UI/Minimap.lua) | El botón del minimapa de este addon: qué hace cada clic |
 | [`Core/Commands.lua`](Core/Commands.lua) | Los comandos `/fundir` |
 
-Los archivos compartidos se editan en [FranTools](https://github.com/fran76yt/FranTools) y se copian aquí con su `tools/sync_shared.py`.
+La librería común FranLib va incrustada en `Libs/FranLib/` y no se edita aquí: el original está en el repositorio FranLib y se copia con su `tools/sync.py`. Lo que necesita saber de este addon está en `ns.FranLibConfig`, al final de [`Core/Constants.lua`](Core/Constants.lua).
 
 ### Pruebas
 
@@ -257,8 +254,8 @@ Cada comprobación que pasa escribe `ok` y la primera que falla para con un erro
 |---|---|
 | [`tests/test.lua`](tests/test.lua) | Las pruebas |
 | [`tests/stubs.lua`](tests/stubs.lua) | Lo que solo simula este addon: TradeSkillMaster, los tooltips y la ventana de profesión |
-| [`tests/api_stubs.lua`](tests/api_stubs.lua) | *Compartido con FranTools.* La API de WoW simulada |
-| [`tests/run.js`](tests/run.js) | *Compartido con FranTools.* Carga la API simulada, el addon y las pruebas |
+| [`tests/api_stubs.lua`](tests/api_stubs.lua) | *De FranLib.* La API de WoW simulada |
+| [`tests/run.js`](tests/run.js) | *De FranLib.* Carga la API simulada, el addon y las pruebas |
 
 Aquí corre Lua 5.3 y WoW usa Lua 5.1, así que lo que cambia entre ambos (como los números enteros y decimales) no queda probado.
 
@@ -298,11 +295,9 @@ FranFundirChar = {                     -- cada personaje
 ```
 FranFundir/
 ├── FranFundir.toc                     metadatos y orden de carga
+├── Libs/FranLib/                     librería común (copia de FranLib: no se edita aquí)
 ├── Core/
 │   ├── Constants.lua                  constantes
-│   ├── Util.lua                       utilidades genéricas (compartido)
-│   ├── Api.lua                        acceso a la API del juego (compartido)
-│   ├── ErrorLog.lua                   registro de errores de Lua (compartido)
 │   ├── Storage.lua                    SavedVariables
 │   ├── Tsm.lua                        acceso a TradeSkillMaster
 │   ├── Recipes.lua                    recetas combinadas, por material y las que sabes
@@ -315,9 +310,6 @@ FranFundir/
 ├── Data/
 │   └── Recipes.lua                    recetas de minería y alquimia
 ├── UI/
-│   ├── Tooltip.lua                    tooltips de ayuda (compartido)
-│   ├── Checkbox.lua                   casillas (compartido)
-│   ├── MinimapButton.lua              botón del minimapa (compartido)
 │   ├── PlanText.lua                   planes en texto
 │   ├── ItemTooltip.lua                líneas del tooltip de los materiales
 │   ├── RecipeNotice.lua               aviso de recetas cambiadas o nuevas
@@ -329,7 +321,7 @@ FranFundir/
 └── tests/                             pruebas fuera del juego (WoW no lo carga)
     ├── test.lua                       las pruebas
     ├── stubs.lua                      TSM y profesiones simulados
-    ├── api_stubs.lua                  API de WoW simulada (compartido)
-    ├── run.js                         carga el addon y ejecuta las pruebas (compartido)
-    └── package.json                   dependencia: fengari (compartido)
+    ├── api_stubs.lua                  API de WoW simulada (de FranLib)
+    ├── run.js                         carga el addon y ejecuta las pruebas (de FranLib)
+    └── package.json                   dependencia: fengari (de FranLib)
 ```
